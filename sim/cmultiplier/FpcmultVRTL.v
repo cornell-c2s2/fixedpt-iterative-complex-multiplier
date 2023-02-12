@@ -1,6 +1,6 @@
 `ifndef FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
 `define FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
-`include "./fixedpt-iterative-multiplier/sim/multiplier/FpmultVRTL.v"
+`include "butterfly-unit/sim/butterfly/./fixedpt-iterative-complex-multiplier/sim/cmultiplier/./fixedpt-iterative-multiplier/sim/multiplier/FpmultVRTL.v"
 
 module FpcmultVRTL
 # (
@@ -24,74 +24,63 @@ module FpcmultVRTL
 
 	// cr = (ar * br) - (ac * bc)
 	// cc = (ar * bc) + (br * ac) = (ar + ac)(br + bc) - (ac * bc) - (ar * br)
+	
+	logic [n - 1:0] arbr;
+	logic [n - 1:0] acbc;
+	logic [n - 1:0] ar_plus_ac;
+	logic [n - 1:0] br_plus_bc;
+	logic [n - 1:0] ab;
 
-	logic [n-1:0] arbr, acbc, ab, a, b; // temporary values
-	logic arbr_rdy, acbc_rdy, ab_rdy, sab_rdy;
-	logic m1_recv_rdy, m2_recv_rdy, m3_recv_rdy;
-	reg [n-1:0] act, art, bct, brt;
+	assign ar_plus_ac = ar + ac;
+	assign br_plus_bc = br + bc;
+
+	logic recv_rdy_imm [2:0];
+	assign recv_rdy = recv_rdy_imm[0] + recv_rdy_imm[1] + recv_rdy_imm[2];
+
+	logic send_val_imm [2:0];
+	assign send_val = send_val_imm[0] + send_val_imm[1] + send_val_imm[2];
+
 
 	FpmultVRTL #(.n(n), .d(d), .sign(1)) m1 ( // ar * br
 		.clk(clk),
 		.reset(reset),
-		.a(art),
-		.b(brt),
+		.a(ar),
+		.b(br),
 		.c(arbr),
-		.recv_val(sab_rdy),
-		.recv_rdy(m1_recv_rdy),
-		.send_val(arbr_rdy),
-		.send_rdy(1'b1)
+		.recv_val(recv_val),
+		.recv_rdy(recv_rdy_imm[0]),
+		.send_val(send_val_imm[0]),
+		.send_rdy(send_rdy)
 	);
 
 	FpmultVRTL #(.n(n), .d(d), .sign(1)) m2 ( // ac * bc
 		.clk(clk),
 		.reset(reset),
-		.a(act),
-		.b(bct),
+		.a(ac),
+		.b(bc),
 		.c(acbc),
-		.recv_val(sab_rdy),
-		.recv_rdy(m2_recv_rdy),
-		.send_val(acbc_rdy),
-		.send_rdy(1'b1)
+		.recv_val(recv_val),
+		.recv_rdy(recv_rdy_imm[1]),
+		.send_val(send_val_imm[1]),
+		.send_rdy(send_rdy)
 	);
 
 	FpmultVRTL #(.n(n), .d(d), .sign(1)) m3 ( // (ar + ac) * (br + bc)
 		.clk(clk),
 		.reset(reset),
-		.a(a),
-		.b(b),
+		.a(ar_plus_ac),
+		.b(br_plus_bc),
 		.c(ab),
-		.recv_val(sab_rdy),
-		.recv_rdy(m3_recv_rdy),
-		.send_val(ab_rdy),
-		.send_rdy(1'b1)
+		.recv_val(recv_val),
+		.recv_rdy(recv_rdy_imm[2]),
+		.send_val(send_val_imm[2]),
+		.send_rdy(send_rdy)
 	);
+
+
 
 	assign cr = arbr - acbc;
 	assign cc = ab - arbr - acbc;
-
-	always @(posedge clk) begin
-		if (reset) begin
-		  recv_rdy <= 1;
-		  send_val <= 0;
-		  sab_rdy <= 0;
-		end else if (recv_val & recv_rdy) begin 
-			sab_rdy <= 1;
-			a <= ar + ac;
-			b <= br + bc;
-			act <= ac;
-			art <= ar;
-			bct <= bc;
-			brt <= br;
-			recv_rdy <= 0;
-			send_val <= 0;
-		end else if (sab_rdy) begin
-			sab_rdy <= 0;
-		end else if (~sab_rdy & ~send_val & arbr_rdy & acbc_rdy & ab_rdy) begin // all multipliers are done!
-			send_val <= 1;
-		end else if (~recv_rdy & send_val & send_rdy) begin
-			recv_rdy <= 1;
-		end
-	end
 
 
 endmodule
