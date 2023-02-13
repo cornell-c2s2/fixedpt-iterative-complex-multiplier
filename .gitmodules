@@ -1,0 +1,3 @@
+[submodule "sim/cmultiplier/fixedpt-iterative-multiplier"]
+	path = sim/cmultiplier/fixedpt-iterative-multiplier
+	url = https://github.com/cornell-c2s2/fixedpt-iterative-multiplier.git
