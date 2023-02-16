@@ -1,6 +1,6 @@
 `ifndef FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
 `define FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
-`include "./fixedpt-iterative-complex-multiplier/sim/cmultiplier/./fixedpt-iterative-multiplier/sim/multiplier/FpmultVRTL.v"
+`include "../../../fixedpt-iterative-multiplier/sim/multiplier/FpmultVRTL.v"
 
 module FpcmultVRTL
 # (
