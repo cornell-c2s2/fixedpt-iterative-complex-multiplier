@@ -35,10 +35,10 @@ module FpcmultVRTL
 	assign br_plus_bc = br + bc;
 
 	logic recv_rdy_imm [2:0];
-	assign recv_rdy = recv_rdy_imm[0] + recv_rdy_imm[1] + recv_rdy_imm[2];
+	assign recv_rdy = recv_rdy_imm[0] & recv_rdy_imm[1] & recv_rdy_imm[2];
 
 	logic send_val_imm [2:0];
-	assign send_val = send_val_imm[0] + send_val_imm[1] + send_val_imm[2];
+	assign send_val = send_val_imm[0] & send_val_imm[1] & send_val_imm[2];
 
 
 	FpmultVRTL #(.n(n), .d(d), .sign(1)) m1 ( // ar * br
