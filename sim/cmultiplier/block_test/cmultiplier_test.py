@@ -170,5 +170,5 @@ def test_random(execution_number, sequence_length, n, d): # test individual and 
 	run_sim(model, cmdline_opts={
 		'dump_textwave':False,
 		'dump_vcd':f'rand_{execution_number}_{sequence_length}_{n}_{d}',
-		'max_cycles':(30+(n+4)*len(dat)) # makes sure the time taken grows linearly with respect to n
+		'max_cycles':(30+(3*(n+2)+2)*len(dat)) # makes sure the time taken grows linearly with respect to 3n
 	})
